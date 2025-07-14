@@ -361,3 +361,42 @@ POST /predict
 - All services are defined in Docker Compose for reproducible deployment.
 - Prometheus and Grafana are auto-provisioned for monitoring and alerting.
 
+# Quickstart
+
+## 1. Prerequisite: .env-keys file
+Create a `.env-keys` file in the project root with your AWS credentials:
+```
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+```
+
+## 2. Run the Training Pipeline (Docker)
+**Build:**
+```bash
+export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.train -t titanic-train .
+```
+**Run:**
+```bash
+docker run --rm -v $(pwd):/app titanic-train
+```
+
+## 3. Run the API (Docker)
+**Build:**
+```bash
+export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.api -t titanic-api .
+```
+**Run:**
+```bash
+docker run -p 8000:8000 titanic-api
+```
+
+## 4. Run the Full Stack (API + Monitoring) with Docker Compose
+```bash
+docker-compose -f docker-compose-api.yml up --build
+```
+- The API will be available at: http://localhost:8000
+- Interactive docs: http://localhost:8000/docs
+- Grafana dashboards: http://localhost:3000 (no login needed)
+
+---
+
