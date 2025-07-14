@@ -38,7 +38,7 @@ A machine learning pipeline and API for predicting passenger survival on the Tit
 
 **Option 1: Using Docker (Recommended)**
 ```bash
-docker build -f Dockerfile.train -t titanic-train .
+export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.train -t titanic-train .
 docker run --rm -v $(pwd):/app titanic-train
 
 ```
@@ -54,12 +54,11 @@ python src/train_xgboost.py
 
 **Option 1: Docker (Production Ready)**
 ```bash
-# Build and run API
-docker build -f Dockerfile.api -t titanic-api .
-docker run -p 8000:8000 titanic-api
+export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.api -t titanic-api .
+docker run --env-file .env-keys -p 8000:8000 titanic-api
 
-# Or using docker-compose
-docker-compose up --build
+# Or using docker-compose (loads .env-keys automatically)
+docker-compose -f docker-compose-api.yml up --build
 ```
 
 **Option 2: Local Development**
@@ -387,7 +386,7 @@ export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --
 ```
 **Run:**
 ```bash
-docker run -p 8000:8000 titanic-api
+docker run --env-file .env-keys -p 8000:8000 titanic-api
 ```
 
 ## 4. Run the Full Stack (API + Monitoring) with Docker Compose
@@ -399,4 +398,10 @@ docker-compose -f docker-compose-api.yml up --build
 - Grafana dashboards: http://localhost:3000 (no login needed)
 
 ---
+
+## Notes
+- The API container now requires the `.env-keys` file at runtime (see `--env-file .env-keys` above or the `env_file` section in docker-compose).
+- The API will automatically run `dvc pull --force` at startup to fetch models/data from S3.
+- You no longer need to pass AWS credentials as build args for the API unless you want to build with private data at build time (not recommended for security).
+- The training pipeline still requires credentials at build time for DVC pull.
 
