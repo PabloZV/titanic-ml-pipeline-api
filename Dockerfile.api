@@ -1,3 +1,5 @@
+# docker build -f Dockerfile.api -t titanic-api .
+# docker run -p 8000:8000 titanic-api
 # --- Build stage: run tests ---
 FROM python:3.11-slim as build
 WORKDIR /app

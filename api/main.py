@@ -12,6 +12,9 @@ from typing import Optional
 import pandas as pd
 from contextlib import asynccontextmanager
 from sklearn.pipeline import Pipeline
+import prometheus_client
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from fastapi import Response
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -36,6 +39,13 @@ logger = logging.getLogger(__name__)
 MODEL_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../models/best_model.pkl'))
 model = None
 metrics = {"requests": 0, "prediction_time": 0.0, "start_time": time.time()}
+
+
+# Prometheus metrics
+REQUEST_COUNT = Counter('api_requests_total', 'Total API Requests', ['method', 'endpoint', 'http_status'])
+REQUEST_LATENCY = Histogram('api_request_latency_seconds', 'API Request latency', ['endpoint'])
+#CPU_USAGE = Gauge('api_cpu_usage_percent', 'API process CPU usage percent')
+#MEMORY_USAGE = Gauge('api_memory_usage_mb', 'API process memory usage in MB')
 
 class PassengerInput(BaseModel):
     """Passenger data input"""
@@ -115,22 +125,30 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+
 @app.middleware("http")
-async def track_requests(request: Request, call_next):
-    """Log requests and track performance"""
+async def logging_and_prometheus_middleware(request: Request, call_next):
+    """Log requests, track performance, and update Prometheus metrics"""
     metrics["requests"] += 1
     start_time = time.time()
-    
     logger.info(f"Request {metrics['requests']}: {request.method} {request.url}")
-    
+    # Update CPU and memory usage gauges on every request
+    #process = psutil.Process()
+    #MEMORY_USAGE.set(process.memory_info().rss / 1024 / 1024)
+    #CPU_USAGE.set(psutil.cpu_percent())
     try:
         response = await call_next(request)
         process_time = (time.time() - start_time) * 1000
         logger.info(f"Request completed in {process_time:.2f}ms")
         response.headers["X-Process-Time"] = str(process_time)
+        # Prometheus metrics (seconds)
+        endpoint = request.url.path
+        REQUEST_COUNT.labels(request.method, endpoint, response.status_code).inc()
+        REQUEST_LATENCY.labels(endpoint).observe(process_time / 1000.0)
         return response
     except Exception as e:
         logger.error(f"Request failed: {e}")
+        # Optionally, you can increment an error counter here
         raise
 
 @app.post("/predict", response_model=PredictResponse)
@@ -189,7 +207,7 @@ async def health_check():
         logger.error(f"Health check failed: {e}")
         raise HTTPException(status_code=500, detail="Health check failed")
 
-@app.get("/metrics", response_model=MetricsResponse)
+@app.get("/metricas", response_model=MetricsResponse)
 async def get_metrics():
     """Detailed metrics for monitoring."""
     try:
@@ -203,6 +221,11 @@ async def get_metrics():
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail="Metrics unavailable")
+
+
+@app.get("/prometheus", include_in_schema=False)
+def prometheus_metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @app.get("/")
 async def root():

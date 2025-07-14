@@ -1,0 +1,49 @@
+apiVersion: 1
+groups:
+  - name: API Alerts
+    folder: API Alerts
+    interval: 1m
+    rules:
+      - uid: api-cpu-high
+        title: High API CPU Usage
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus-main
+            model:
+              expr: rate(process_cpu_seconds_total[1m])
+              interval: ""
+              legendFormat: "CPU Usage"
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus-main
+            model:
+              expr: ""
+              refId: B
+        for: 15s
+        annotations:
+          summary: "API CPU usage is above 0.5% for 15 seconds"
+        labels:
+          severity: warning
+        isPaused: false
+        noDataState: NoData
+        execErrState: Error
+        conditions:
+          - evaluator:
+              params:
+                - 0.005
+              type: gt
+            operator:
+              type: and
+            query:
+              params:
+                - A
+            reducer:
+              type: avg
+            type: query

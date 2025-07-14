@@ -276,12 +276,61 @@ The pipeline generates files with evaluation data:
 - **Model artifacts** saved as pickle files
 - **Detailed logs** with profiling information
 
-
-
-
-
-
 ---
 
 This implementation focuses on the core requirements with practical, working solutions for binary classification, automation, profiling, and containerization.
+
+## API Documentation
+
+### Overview
+This API provides real-time predictions for Titanic passenger survival using a trained classifier. It is designed for batch predictions, monitoring, profiling, and production readiness.
+
+### Features
+- **Batch Prediction Endpoint:**  Receives a list of passengers and returns survival predictions for each.
+- **Error Handling:**  Returns appropriate HTTP status codes and error messages for invalid input, missing model, and unhandled exceptions.
+- **Interactive Documentation:**  Built with FastAPI, providing automatic OpenAPI docs at `/docs` and `/redoc`.
+- **Logging:**  All requests, responses, and errors are logged to file and console.
+- **Monitoring & Alerts:**  Exposes Prometheus metrics for requests, latency, CPU, and RAM usage. Integrated with Grafana dashboards and alerting.
+- **Profiling:**  Tracks CPU and RAM usage, request rates, and supports scaling via Docker and multi-worker deployment.
+- **Unit Testing:**  Includes tests for the model’s predict function to ensure reliability.
+- **Dockerized:**  All components (API, Prometheus, Grafana) are containerized for easy deployment.
+
+### Main Endpoints
+- `POST /predict`  Accepts a list of passenger objects and returns survival predictions.
+- `GET /health`  Returns API health status and system metrics.
+- `GET /prometheus`  Exposes metrics for Prometheus scraping.
+
+### Usage Example
+```json
+POST /predict
+[
+  {
+    "Pclass": 3,
+    "Sex": "male",
+    "Age": 22,
+    "SibSp": 1,
+    "Parch": 0,
+    "Fare": 7.25,
+    "Embarked": "S"
+  }
+]
+```
+
+### Monitoring & Scaling
+- Metrics are available in Grafana dashboards.
+- Alerts are provisioned for high CPU usage and other conditions.
+- Profiling data (CPU, RAM, request rates) is collected and visualized.
+- The API is designed to scale horizontally using Docker and multiple workers.
+
+### Error Handling
+- Returns `400 Bad Request` for invalid input.
+- Returns `503 Service Unavailable` if the model is not loaded.
+- Returns `500 Internal Server Error` for unhandled exceptions.
+
+### Testing
+- Unit tests for the model’s predict function are included in the `tests/` directory.
+
+### Deployment
+- All services are defined in Docker Compose for reproducible deployment.
+- Prometheus and Grafana are auto-provisioned for monitoring and alerting.
 

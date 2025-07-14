@@ -16,3 +16,4 @@ dependencies:
       - uvicorn==0.35.0
       - dvc[gcs]==3.61.0
       - httpx==0.28.1
+      - prometheus_client==0.22.1
