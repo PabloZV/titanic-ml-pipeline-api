@@ -114,12 +114,15 @@ async def lifespan(app: FastAPI):
     finally:
         logger.info("API shutdown")
 
+
 app = FastAPI(
     title="Titanic Survival Prediction API",
     description="Predict passenger survival on the Titanic",
     version="1.0.0",
     lifespan=lifespan
 )
+
+
 
 
 @app.middleware("http")
@@ -184,6 +187,23 @@ async def predict_survival(passengers: List[PassengerInput]):
         logger.error(f"Prediction error: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
+# Endpoint to print feature importances
+@app.get("/feature_importance")
+async def get_feature_importance():
+    """Return preprocessed feature importances from /models/feature_importance.json"""
+    try:
+        fi_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../models/feature_importance.json'))
+        if not os.path.exists(fi_path):
+            raise HTTPException(status_code=404, detail="feature_importance.json not found")
+        import json
+        with open(fi_path, 'r') as f:
+            data = json.load(f)
+        return {"feature_importance": data}
+    except Exception as e:
+        logger.error(f"Feature importance error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error reading feature importances: {str(e)}")
+    
+    
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check with system metrics."""

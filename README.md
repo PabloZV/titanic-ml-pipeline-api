@@ -212,6 +212,25 @@ passengers = [
 response = requests.post("http://localhost:8000/predict/batch", json={"passengers": passengers})
 ```
 
+## Feature Importance Endpoint
+
+The API provides a `/feature_importance` endpoint that returns the preprocessed feature importances from `/models/feature_importance.json`.
+
+**Usage:**
+- Send a GET request to `/feature_importance`
+- Response will be a JSON object with the feature importances used by the model
+
+Example response:
+```json
+{
+  "feature_importance": {
+    "feature1": 0.23,
+    "feature2": 0.18,
+    ...
+  }
+}
+```
+
 ## 🐳 Docker Deployment
 
 ### Testing in Containers
