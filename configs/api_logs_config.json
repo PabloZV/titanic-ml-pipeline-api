@@ -2,7 +2,7 @@
   "level": "INFO",
   "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
   "log_to_file": true,
-  "log_file_path": "logs/train_pipeline.log",
+  "log_file_path": "logs/api.log",
   "max_bytes": 10000000,
   "backup_count": 3
 }

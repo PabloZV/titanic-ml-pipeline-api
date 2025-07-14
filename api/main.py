@@ -19,20 +19,16 @@ from fastapi import Response
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Logging setup
-log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs')
-os.makedirs(log_dir, exist_ok=True)
-log_file = os.path.join(log_dir, 'api.log')
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(log_file, mode='a')
-    ]
-)
-logger = logging.getLogger(__name__)
+# Use custom logging utility
+from src.logging_utils import setup_logging
+
+# Path to API logging config
+API_LOGS_CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../configs/api_logs_config.json'))
+API_LOG_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../logs/api.log'))
+os.makedirs(os.path.dirname(API_LOG_FILE_PATH), exist_ok=True)
+setup_logging(log_path=API_LOG_FILE_PATH, logs_config_path=API_LOGS_CONFIG_PATH)
+logger = logging.getLogger("api")
 
 
 # Global state
