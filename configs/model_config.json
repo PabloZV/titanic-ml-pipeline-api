@@ -1,0 +1,9 @@
+{
+  "data_path": "data/train.csv",
+  "model_path": "models/best_model.pkl",
+  "importances_path": "models/feature_importance.json",
+  "eval_report_path": "models/eval_report.json",
+  "log_path": "logs/train_pipeline.log",
+  "test_size": 0.2,
+  "random_seed": 42
+}

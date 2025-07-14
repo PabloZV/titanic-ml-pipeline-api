@@ -1,0 +1,40 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model files (trained ML models)
+
+# Data files
+data/*
+*.csv
+
+# Model files
+models/*
+*.pkl
+
+# Log files
+logs/*
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*~
