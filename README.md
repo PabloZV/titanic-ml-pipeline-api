@@ -249,32 +249,32 @@ docker-compose --profile production up
 - `PYTHONHASHSEED=42` for reproducible results
 - `LOG_LEVEL=INFO` for logging configuration
 
-## 📁 Key Files
+# Data & Model Versioning with DVC and S3
 
-| File | Purpose |
-|------|---------|
-| `src/train_xgboost.py` | Main training script with profiling |
-| `src/train_profiling.py` | CPU/RAM monitoring utilities |
-| `src/column_transformers.py` | Feature preprocessing pipeline |
-| `src/logging_utils.py` | Configurable logging setup |
-| `api/main.py` | FastAPI prediction service |
-| `configs/logs_config.json` | Logging configuration |
-| `conda-env.yml` | Environment specification |
+This project uses [DVC](https://dvc.org/) to version and manage large files in `/data` and `/models`.
 
-## � Running the Complete Pipeline
+## Remote Storage
+- **Remote:** AWS S3 bucket: `titanic-ml-pipeline-api/ml-pipeline`
+- DVC is configured to push and pull data/models from this S3 bucket.
 
-1. **Setup environment**: `conda env create -f conda-env.yml`
-2. **Train model**: `python src/train_xgboost.py`
-3. **Start API**: `cd api && uvicorn main:app --reload`
-4. **Make predictions**: Use the `/predict` endpoint
+## How to Use
+1. **Install requirements:**
+   - With pip: `pip install 'dvc[s3]'`
+   - Or use the provided `conda-env.yml`.
+2. **Set up AWS credentials:**
+   - Use `aws configure` or set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+3. **Pull data and models:**
+   ```bash
+   dvc pull
+   ```
+4. **Push changes (if you have write access):**
+   ```bash
+   dvc push
+   ```
 
-## 📈 Evaluation Results
-
-The pipeline generates files with evaluation data:
-- **Cross-validation metrics** saved to `models/eval_report.json`
-- **Feature importance** analysis in `models/feature_importance.json`
-- **Model artifacts** saved as pickle files
-- **Detailed logs** with profiling information
+## Notes
+- The S3 bucket may be public for read-only access, but only authorized users can push.
+- See `.dvcignore` for files/folders excluded from DVC tracking.
 
 ---
 
