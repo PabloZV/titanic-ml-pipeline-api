@@ -25,12 +25,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir fastapi uvicorn python-multipart psutil dvc[s3]
 COPY . .
 
-# DVC S3 credentials for pulling model/data
-RUN dvc pull --force
+# DVC S3 credentials for pulling model/data now handled at runtime
 RUN useradd --create-home --shell /bin/bash apiuser && chown -R apiuser:apiuser /app
 USER apiuser
 EXPOSE 8000
 ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD bash -c 'dvc pull --force && exec uvicorn api.main:app --host 0.0.0.0 --port 8000'
