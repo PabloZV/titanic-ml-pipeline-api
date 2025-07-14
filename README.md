@@ -88,45 +88,45 @@ pytest tests/ -v
 
 The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
 
-## ✅ Implemented Features
+##  Implemented Features
 
-### 1. Binary Classifier ✅
+### 1. Binary Classifier 
 - **XGBoost implementation** with hyperparameter optimization
 - **Stratified cross-validation** for model evaluation
 - **Feature cleaning and scaling** with proper preprocessing pipeline
 - **Model comparison** between XGBoost, LogisticRegression, RandomForest, and LinearSVM
 
-### 2. Automated Pipeline Execution ✅
+### 2. Automated Pipeline Execution 
 - **Single command training**: `python src/train_xgboost.py`
 - **Modular pipeline** with separate stages for data loading, preprocessing, training
 - **Automated model saving** and evaluation report generation
 - **Reproducible results** with fixed random seeds
 
-### 3. Pipeline Profiling ✅
+### 3. Pipeline Profiling 
 - **CPU and RAM monitoring** during each pipeline stage
 - **Execution time tracking** for performance analysis
 - **Resource usage logging** with detailed profiling information
 - Located in `src/train_profiling.py`
 
-### 4. Dockerized Solution ✅
+### 4. Dockerized Solution 
 - **Training pipeline containerization** with `Dockerfile`
 - **Python 3.11-slim base image** for efficiency
 - **Volume mounting** for model persistence
 - **Environment variable** setup for reproducibility
 
-### 5. Improved Classifier Implementation ✅
+### 5. Improved Classifier Implementation 
 - **Enhanced from notebook**: Added proper cross-validation, hyperparameter tuning
 - **Grid search optimization** for best parameters
 - **Stratified sampling** to handle class imbalance
 - **Multiple model comparison** with systematic evaluation
 
-### 6. Logs Configuration ✅
+### 6. Logs Configuration 
 - **Structured logging** with `src/logging_utils.py`
 - **Configurable logging** via `configs/logs_config.json`
 - **File and console output** with rotation and backup
 - **Profiling logs** integrated into training pipeline
 
-### 7. Virtual Environment Configuration ✅
+### 7. Virtual Environment Configuration 
 - **Conda environment**: `conda-env.yml` with pinned versions
 - **Pip requirements**: `requirements.txt` for alternative setup
 - **Dependency management** with specific versions for reproducibility
