@@ -1,6 +1,9 @@
 # Dockerfile for running the Titanic XGBoost training pipeline
-# Build with: docker build -f Dockerfile.train -t titanic-train .
-# Run with: docker run --rm -v $(pwd):/app titanic-train
+#Build:
+#export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.train -t titanic-train .
+
+#Run:
+#docker run --rm -v $(pwd):/app titanic-train
 
 FROM python:3.11-slim
 
@@ -15,9 +18,19 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements and install Python dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir dvc[s3]
+
 
 # Copy the rest of the code
 COPY . .
+
+# Pass AWS credentials as build args and env vars for DVC
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+RUN dvc pull --force
 
 # Set environment variables for reproducibility
 ENV PYTHONHASHSEED=42

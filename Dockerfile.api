@@ -1,5 +1,9 @@
-# docker build -f Dockerfile.api -t titanic-api .
-# docker run -p 8000:8000 titanic-api
+#Build:
+#export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.api -t titanic-api .
+
+#Run:
+#docker run -p 8000:8000 titanic-api
+
 # --- Build stage: run tests ---
 FROM python:3.11-slim as build
 WORKDIR /app
@@ -13,9 +17,16 @@ RUN pytest tests/ -v
 FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt ./
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir fastapi uvicorn python-multipart psutil
+RUN pip install --no-cache-dir fastapi uvicorn python-multipart psutil dvc[s3]
 COPY . .
+
+# DVC S3 credentials for pulling model/data
+RUN dvc pull --force
 RUN useradd --create-home --shell /bin/bash apiuser && chown -R apiuser:apiuser /app
 USER apiuser
 EXPOSE 8000

@@ -295,6 +295,14 @@ This project uses [DVC](https://dvc.org/) to version and manage large files in `
 - The S3 bucket may be public for read-only access, but only authorized users can push.
 - See `.dvcignore` for files/folders excluded from DVC tracking.
 
+## DVC S3 Access for Reviewers
+
+A `.env-keys` file containing AWS credentials will be provided for the revision of this challenge. This is required to allow reviewers to pull the DVC-tracked data and models from the private S3 bucket.
+
+**Note:**
+- A better solution for open review would be to make the S3 bucket public-read, so anyone can pull the DVC repo without credentials.
+- As an improvement, consider configuring the S3 bucket for public read access and removing the need for secret keys in the future.
+
 ---
 
 This implementation focuses on the core requirements with practical, working solutions for binary classification, automation, profiling, and containerization.
