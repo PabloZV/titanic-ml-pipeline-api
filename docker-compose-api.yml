@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   titanic-api:
     build:
@@ -9,7 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./logs:/app/logs
-      - ./models:/app/models:ro
+      - ./models:/app/models
     environment:
       - PYTHONPATH=/app
       - LOG_LEVEL=INFO

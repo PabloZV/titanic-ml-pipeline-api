@@ -28,64 +28,47 @@ A machine learning pipeline and API for predicting passenger survival on the Tit
 └── Dockerfile                 # Docker container for training
 ```
 
-## 🚀 Quick Start
+# Quickstart
 
-### Prerequisites
-- Python 3.11+
-- Docker (optional)
+## 1. Prerequisite: .env-keys file
+Create a `.env-keys` file in the project root with your AWS credentials:
+```
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+```
 
-### Environment Setup and Training
-
-**Option 1: Using Docker (Recommended)**
+## 2. Run the Training Pipeline (Docker)
+**Build:**
 ```bash
 export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.train -t titanic-train .
-docker run --rm -v $(pwd):/app titanic-train
-
 ```
-
-**Option 2: Using Conda**
+**Run:**
 ```bash
-conda env create -f conda-env.yml
-conda activate titanic-ml
-python src/train_xgboost.py
+docker run --rm -v $(pwd):/app titanic-train
 ```
 
-### API Deployment
-
-**Option 1: Docker (Production Ready)**
+## 3. Run the API (Docker)
+**Build:**
 ```bash
 export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.api -t titanic-api .
+```
+**Run:**
+```bash
 docker run --env-file .env-keys -p 8000:8000 titanic-api
-
-# Or using docker-compose (loads .env-keys automatically)
-docker-compose -f docker-compose-api.yml up --build
 ```
 
-**Option 2: Local Development**
+## 4. Run the Full Stack (API + Monitoring) with Docker Compose
 ```bash
-# Install API dependencies
-pip install fastapi uvicorn python-multipart psutil
-
-# Run the API
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+docker compose -f docker-compose-api.yml up --build
 ```
+- The API will be available at: http://localhost:8000
+- Interactive docs: http://localhost:8000/docs
+- Prometheus UI at: http://localhost:9090
+- Grafana dashboards and Alerts: http://localhost:3000
 
-### Testing
+To failitate stess CPU usage when seeing grafana dashboards ./api/sample_client_repeater.py or ./api/sample_client.py . One alert was set up as demsotration, it can be seen in the Grafana UI.
 
-**Containerized Testing (Ensures Environment Consistency)**
-```bash
-# Run tests using docker-compose (recommended)
-docker-compose --profile test run --rm test
 
-# Or build and run test container directly
-docker build -f Dockerfile.test -t titanic-api-test .
-docker run --rm titanic-api-test
-
-# Local testing (if needed)
-pytest tests/ -v
-```
-
-The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
 
 ##  Implemented Features
 
@@ -185,10 +168,9 @@ The API will be available at `http://localhost:8000` with interactive documentat
 
 ### API Endpoints
 ```bash
-POST /predict           # Single passenger prediction
-POST /predict/batch     # Multiple passengers prediction
+POST /predict          # Passenger prediction
 GET  /health           # Health check and system status
-GET  /metrics          # Performance and system metrics
+GET  /prometheus       # Performance and system metrics meant to be consumed by prometheus
 GET  /docs             # Interactive API documentation
 ```
 
@@ -229,43 +211,6 @@ Example response:
   }
 }
 ```
-
-## 🐳 Docker Deployment
-
-### Testing in Containers
-```bash
-# Run tests in containerized environment (recommended for CI/CD)
-docker build -f Dockerfile.test -t titanic-api-test .
-docker run --rm titanic-api-test
-
-# Or use docker-compose
-docker-compose --profile test run --rm test
-```
-
-### Training Pipeline
-```bash
-docker build -t titanic-train .
-docker run --rm -v $(pwd):/app titanic-train
-```
-
-### API Service
-```bash
-# Build with integrated testing (tests run during build)
-docker build -f Dockerfile.api -t titanic-api .
-docker run -p 8000:8000 titanic-api
-
-# Production with docker-compose
-docker-compose --profile production up
-```
-
-### Container Features
-- **Security**: Non-root user execution
-- **Health checks**: Built-in container health monitoring  
-- **Log persistence**: Volume mounting for log retention
-
-**Environment variables:**
-- `PYTHONHASHSEED=42` for reproducible results
-- `LOG_LEVEL=INFO` for logging configuration
 
 # Data & Model Versioning with DVC and S3
 
@@ -312,7 +257,7 @@ This implementation focuses on the core requirements with practical, working sol
 This API provides real-time predictions for Titanic passenger survival using a trained classifier. It is designed for batch predictions, monitoring, profiling, and production readiness.
 
 ### Features
-- **Batch Prediction Endpoint:**  Receives a list of passengers and returns survival predictions for each.
+- **Prediction Endpoint:**  Receives a list of passengers and returns survival predictions for each.
 - **Error Handling:**  Returns appropriate HTTP status codes and error messages for invalid input, missing model, and unhandled exceptions.
 - **Interactive Documentation:**  Built with FastAPI, providing automatic OpenAPI docs at `/docs` and `/redoc`.
 - **Logging:**  All requests, responses, and errors are logged to file and console.
@@ -360,48 +305,12 @@ POST /predict
 - All services are defined in Docker Compose for reproducible deployment.
 - Prometheus and Grafana are auto-provisioned for monitoring and alerting.
 
-# Quickstart
 
-## 1. Prerequisite: .env-keys file
-Create a `.env-keys` file in the project root with your AWS credentials:
-```
-AWS_ACCESS_KEY_ID=your_key
-AWS_SECRET_ACCESS_KEY=your_secret
-```
-
-## 2. Run the Training Pipeline (Docker)
-**Build:**
-```bash
-export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.train -t titanic-train .
-```
-**Run:**
-```bash
-docker run --rm -v $(pwd):/app titanic-train
-```
-
-## 3. Run the API (Docker)
-**Build:**
-```bash
-export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.api -t titanic-api .
-```
-**Run:**
-```bash
-docker run --env-file .env-keys -p 8000:8000 titanic-api
-```
-
-## 4. Run the Full Stack (API + Monitoring) with Docker Compose
-```bash
-docker-compose -f docker-compose-api.yml up --build
-```
-- The API will be available at: http://localhost:8000
-- Interactive docs: http://localhost:8000/docs
-- Grafana dashboards: http://localhost:3000 (no login needed)
 
 ---
 
 ## Notes
 - The API container now requires the `.env-keys` file at runtime (see `--env-file .env-keys` above or the `env_file` section in docker-compose).
 - The API will automatically run `dvc pull --force` at startup to fetch models/data from S3.
-- You no longer need to pass AWS credentials as build args for the API unless you want to build with private data at build time (not recommended for security).
 - The training pipeline still requires credentials at build time for DVC pull.
 

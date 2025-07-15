@@ -21,16 +21,19 @@ venv/
 Thumbs.db
 
 
-# Data files
+# Data files - keep folder but ignore contents
 data/*
+!data/.gitkeep
 *.csv
 
-# Model files
+# Model files - keep folder but ignore contents
 models/*
+!models/.gitkeep
 *.pkl
 
-# Log files
+# Log files - keep folder but ignore contents
 logs/*
+!logs/.gitkeep
 *.log
 
 # Temporary files
