@@ -6,7 +6,9 @@ A machine learning pipeline and API for predicting passenger survival on the Tit
 
 ```
 ├── api/
-│   └── main.py                 # FastAPI application for predictions
+│   ├── main.py                 # FastAPI application for predictions
+│   ├── sample_client.py        # Sample client for testing API
+│   └── sample_client_repeater.py # Load testing client
 ├── src/                        # Core ML pipeline components
 │   ├── train_xgboost.py       # Main training pipeline with profiling
 │   ├── column_transformers.py # Feature preprocessing transformers
@@ -19,27 +21,51 @@ A machine learning pipeline and API for predicting passenger survival on the Tit
 │   ├── eval_report.json      # Cross-validation results
 │   └── feature_importance.json # Feature importance analysis
 ├── data/                       # Training datasets
+│   ├── train.csv              # Training data
+│   └── test.csv               # Test data
+├── tests/                      # Unit tests
+│   ├── test_api.py            # API endpoint tests
+│   └── test_model.py          # Model functionality tests
 ├── notebooks/                  # Jupyter notebooks for exploration
+│   ├── 1_feature_cleaning.ipynb
+│   ├── 2_comparing_models.ipynb
+│   └── explorations-ml-challenge.ipynb
 ├── configs/
-│   └── logs_config.json       # Logging configuration
+│   ├── logs_config.json       # Logging configuration
+│   ├── api_logs_config.json   # API logging configuration
+│   └── model_config.json      # Model configuration
+├── grafana/                    # Grafana monitoring setup
+│   └── provisioning/          # Dashboards and datasources
 ├── logs/                       # Application logs
 ├── conda-env.yml              # Conda environment specification
 ├── requirements.txt           # Python dependencies
-└── Dockerfile                 # Docker container for training
+├── data_preprocessing.py       # Standalone data preprocessing script
+├── design_decisions.md         # Architecture and design documentation
+├── prometheus.yml             # Prometheus configuration
+├── docker-compose-api.yml     # Docker Compose for full stack
+├── Dockerfile.api             # Docker container for API service
+├── Dockerfile.train           # Docker container for training pipeline
+├── data.dvc                   # DVC tracking for data files
+└── models.dvc                 # DVC tracking for model files
 ```
 
 # Quickstart
 
-## 1. Prerequisite: .env-keys file
+## 1. Prerequisite: .env-keys file and DVC tracked files
 Create a `.env-keys` file in the project root with your AWS credentials:
 ```
 AWS_ACCESS_KEY_ID=your_key
 AWS_SECRET_ACCESS_KEY=your_secret
 ```
 
+```bash
+dvc pull --force
+```
+
 ## 2. Run the Training Pipeline (Docker)
 **Build:**
 ```bash
+
 export $(cat .env-keys | xargs) && docker build --build-arg AWS_ACCESS_KEY_ID --build-arg AWS_SECRET_ACCESS_KEY -f Dockerfile.train -t titanic-train .
 ```
 **Run:**
@@ -59,7 +85,7 @@ docker run --env-file .env-keys -p 8000:8000 titanic-api
 
 ## 4. Run the Full Stack (API + Monitoring) with Docker Compose
 ```bash
-docker compose -f docker-compose-api.yml up --build
+docker compose -f docker-compose-api.yml up --build -d
 ```
 - The API will be available at: http://localhost:8000
 - Interactive docs: http://localhost:8000/docs
